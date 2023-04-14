@@ -1,0 +1,227 @@
+SQL PRACTICE
+
+
+Terminologies
+-------------
+1.Relation --> Table
+2.Attribute --> column
+3.Tuple --> row/record
+4.Degree --> Total number of attribute/column in a table
+5.Cardinality --> Total number of tuples/rows in a table
+6.Domain --> Set/Range of values for a column
+
+
+
+Trainee
+-------------------------------------------------
+| trNo  |  name   | stipend  | doj				|
+-------------------------------------------------
+| T001     ABC      20000      2012-05-06		|
+| T002	   DEF		30000	   2015-01-11		|
+| T003	   GHI		40000	   2019-06-13		|
+-------------------------------------------------
+
+ - Relation --> Trainee
+ - Attributes --> trNo, name, stipend, doj
+ - Tuples --> All the rows
+ - Degree --> 4
+ - Cardinality --> 3
+ - Domain --> stipend (20000 - 40000)
+
+
+
+CREATE TABLE Employee(
+            empId int PRIMARY KEY,
+            empName varchar(20),
+            deptName varchar(20),
+            salary int,
+            designation varchar(10)
+);
+
+
+INSERT INTO employee (empId, empName, deptName, salary, designation) values (10,'SURESH','SALES',25000,'SM');
+
+INSERT INTO employee (empId, empName, deptName, salary, designation) values (20,'PARAM','SALES',35000,'SM');
+
+INSERT INTO employee (empId, empName, deptName, salary, designation) values (30,'LOKESH','HRM',58000,'SSM');
+
+INSERT INTO employee (empId, empName, deptName, salary, designation) values (40,'SATISH','HRM',38000,'HR');
+
+INSERT INTO employee (empId, empName, deptName, salary, designation) values (50,'HARIOM','BDO',25000,'BM');
+
+INSERT INTO employee (empId, empName, deptName, salary, designation) values (60,'RAHUL','BDO',48000,'BM');
+
+
+
+SELECT * FROM Employee;
++-------+---------+----------+--------+-------------+
+| empId | empName | deptName | salary | designation |
++-------+---------+----------+--------+-------------+
+|    10 | SURESH  | SALES    |  25000 | SM          |
+|    20 | PARAM   | SALES    |  35000 | SM          |
+|    30 | LOKESH  | HRM      |  58000 | SSM         |
+|    40 | SATISH  | HRM      |  38000 | HR          |
+|    50 | HARIOM  | BDO      |  25000 | BM          |
+|    60 | RAHUL   | BDO      |  48000 | BM          |
++-------+---------+----------+--------+-------------+
+
+
+Q1) Write a query to find sum of salaries paid department wise using WHERE clause.
+	
+		> 	SELECT deptName, SUM(salary) AS total_salary 
+		  	FROM Employee
+		  	WHERE deptName = 'SALES';
+
+
+Q2) Write a query to find sum of salaries paid department wise using GROPU BY clause.
+
+		> 	SELECT deptName, SUM(salary) AS total_salary
+	  		FROM Employee
+	  		GROUP BY deptName;
+
+
+Q3) Find counting of employee as TOTAL_EMP for combination of deptName and designation.
+
+		>	SELECT deptName,designation, COUNT(*) AS TOTAL_EMP
+			FROM Employee
+			GROUP BY deptName,designation;
+
+
+Q4) Find department name and total salary paid department wise such that you need to include only those employees whose salary is more than 25000. Show result on Descending order.
+
+		>	SELECT deptName, SUM(salary) as total
+			FROM Employee
+			WHERE salary > 25000
+			GROUP BY deptName
+			ORDER BY total DESC;
+
+
+Q5) Write a query to find department name, total salary paid department wise such that you need to include only those department whose sum of salary is more than 65000.
+
+		>	SELECT deptName, SUM(salary) as total_salary
+			FROM Employee
+			GROUP BY deptName
+			HAVING total_salary > 65000;
+
+
+Q6) Write a query to find depatement, average salary paid of the employee department wise such that include only thos employees whose designation has letter 'M' anywhere; consider only those groups whose total salary is more than or equal to 60000. Display the record in the descending order of the average salaries.
+
+		>	SELECT deptName,AVG(salary) AS avg_salary
+			FROM Employee
+			WHERE designation LIKE '%M%'
+			GROUP BY deptName
+			HAVING SUM(salary) >= 60000
+			ORDER BY avg_salary DESC;
+
+
+
+====================== JOIN STATEMENTS ================================
+
+CREATE TABLE Category(
+	catId int(10) PRIMARY KEY,
+	catName varchar(20) NOT NULL
+);
+
+INSERT INTO Category VALUES 
+	(1,'Electronics'),
+	(2,'Stationary'),
+	(3,'Furniture'),
+	(4,'Food Items'),
+	(5,'House-keeping Goods');
+
+
+
+CREATE TABLE Product(
+prodId INT(8) PRIMARY KEY,
+prodName VARCHAR(20) NOT NULL, 
+MRP double (7,2),
+MFG_DATE date NOT NULL,
+categoryId int(6),
+CONSTRAINT fk_cat_pro FOREIGN KEY (categoryId) REFERENCES category (catId)
+);
+
+
+INSERT INTO Product VALUES
+	(1,'Parker Pen', 349, '2022-06-16',2),
+	(2,'Student Chair', 1499, '2022-12-31',3),
+	(3,'Dark Chocolate', 399, '2022-04-30',4),
+	(4,'Microwave Oven', 10500, '2022-05-15',1),
+	(5,'AC', 34500, '2022-05-01',1),
+	(6,'Footware', 599, '2022-05-01',NULL);
+
+
+Q1) Write a query to apply cross join on both tables.
+
+		> SELECT * from Category CROSS JOIN Product;
+		> SELECT * from Category, Product;
+
+
+Q2) Write a query to display all the records from category and product table that has matching entry.
+
+		> SELECT * FROM category c INNER JOIN product p ON c.catId = p.categoryId;
+
+
+Q3) Write a query to display all the records from category and product table that has matching entry including all categories;
+
+		> SELECT * FROM category c LEFT JOIN product p ON c.catId = p.categoryId;
+
+
+Q4) Write a query to display all the records from category and product table that has matching entry including all products;
+
+		> SELECT * FROM category c RIGHT JOIN product p ON c.catId = p.categoryId;
+
+
+Q5) Write a query to find catName , prodName, MRP for all the products such that includes only those products whose price ia more than 1000.00.
+		
+
+		Correct Solution : SLOW
+		=======================
+		> SELECT catName, prodName, MRP
+		  FROM category INNER JOIN product
+		  ON category.catId = product.categoryId
+		  WHERE MRP > 1000.00;
+
+
+		Better Solution : FAST
+		=======================
+		> SELECT catName, prodName, MRP
+		  FROM category INNER JOIN product
+		  ON category.catId = product.categoryId AND MRP > 1000.00;
+
+
+
+
+======================= SUB QUERIES ============================
+
+CREATE TABLE STUDENT(
+	rollNo int(8) PRIMARY KEY,
+	name varchar(20) NOT NULL,
+	email varchar(20) UNIQUE,
+	x_per double(5,2) Default(33.0),
+	state varchar(20)
+);
+
+INSERT INTO STUDENT 
+VALUES
+(1,'ABC', 'abc@ms.com', 75.42, 'Karnataka'),
+(2,'BCD', 'bcd@ms.com', 33.00, 'Rajasthan'),
+(3,'KLF', 'klf@ms.com', 45.40, 'Maharastra'),
+(4,'PSQ', 'psq@ms.com', 75.42, 'West Bengal'),
+(5,'KOU', 'kou@ms.com', 55.00, 'Odisha'),
+(6,'UKQ', 'ukq@ms.com', 66.42, 'Delhi'),
+(7,'LMS', 'lms@ms.com', 48.29, 'Punjab'),
+(8,'DSA', 'dsa@ms.com', 80.42, 'Haryana'),
+(9,'CSI', 'csi@ms.com', 77.40, 'Uttarakhand'),
+(10,'NPM', 'npm@ms.com', 78.22, 'Gujrat');
+
+
+
+
+Q1) Write a query to find record of student whose percentage is MAXIMUM among all the student records and state is Karnataka.
+
+	> SELECT * FROM student WHERE x_per > (SELECT MAX(x_per) FROM student WHERE state = 'Karnataka');
+	  
+
+Q2) Write query to display name, x_per, avarage percentage, difference of student's percentage for all students.
+
+	> SELECT name, x_per, (SELECT AVG(x_per) from student) as AVG_PER, (x_per - (SELECT AVG(x_per))) as DIFFERENCE from student;
